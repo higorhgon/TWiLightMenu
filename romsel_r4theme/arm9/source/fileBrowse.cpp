@@ -181,8 +181,9 @@ void getDirectoryContents(std::vector<DirEntry> &dirContents, const std::vector<
 				const size_t len = ms().romfolder[i].length();
 				if (strncasecmp(currentPath, ms().romfolder[i].c_str(), len) == 0) {
 					if (len > 0 && ms().romfolder[i][len-1] == '/') {
-						inRomPath = true;
-					} else if (currentPath[len] == '/' || currentPath[len] == '\0') {
+						// Only a subdirectory (not the root itself)
+						if (currentPath[len] != '\0') inRomPath = true;
+					} else if (currentPath[len] == '/') {
 						inRomPath = true;
 					}
 				}
@@ -191,8 +192,8 @@ void getDirectoryContents(std::vector<DirEntry> &dirContents, const std::vector<
 				const size_t len = ms().romPath[i].length();
 				if (strncasecmp(currentPath, ms().romPath[i].c_str(), len) == 0) {
 					if (len > 0 && ms().romPath[i][len-1] == '/') {
-						inRomPath = true;
-					} else if (currentPath[len] == '/' || currentPath[len] == '\0') {
+						if (currentPath[len] != '\0') inRomPath = true;
+					} else if (currentPath[len] == '/') {
 						inRomPath = true;
 					}
 				}
