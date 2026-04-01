@@ -176,28 +176,33 @@ void getDirectoryContents(std::vector<DirEntry> &dirContents, const std::vector<
 	bool inRomPath = false;
 	char currentPath[PATH_MAX];
 	if (getcwd(currentPath, PATH_MAX)) {
-		for (int i = 0; i < 2; i++) {
-			if (!ms().romfolder[i].empty()) {
-				const size_t len = ms().romfolder[i].length();
-				if (strncasecmp(currentPath, ms().romfolder[i].c_str(), len) == 0) {
-					if (len > 0 && ms().romfolder[i][len-1] == '/') {
-						inRomPath = true;
-					} else if (currentPath[len] == '/' || currentPath[len] == '\0') {
-						inRomPath = true;
+		// Never show underscore dirs at the device root (sd:/ or fat:/)
+		const bool atDeviceRoot = (strcasecmp(currentPath, "sd:/") == 0 ||
+		                           strcasecmp(currentPath, "fat:/") == 0);
+		if (!atDeviceRoot) {
+			for (int i = 0; i < 2; i++) {
+				if (!ms().romfolder[i].empty()) {
+					const size_t len = ms().romfolder[i].length();
+					if (strncasecmp(currentPath, ms().romfolder[i].c_str(), len) == 0) {
+						if (len > 0 && ms().romfolder[i][len-1] == '/') {
+							inRomPath = true;
+						} else if (currentPath[len] == '/' || currentPath[len] == '\0') {
+							inRomPath = true;
+						}
 					}
 				}
-			}
-			if (!inRomPath && !ms().romPath[i].empty()) {
-				const size_t len = ms().romPath[i].length();
-				if (strncasecmp(currentPath, ms().romPath[i].c_str(), len) == 0) {
-					if (len > 0 && ms().romPath[i][len-1] == '/') {
-						inRomPath = true;
-					} else if (currentPath[len] == '/' || currentPath[len] == '\0') {
-						inRomPath = true;
+				if (!inRomPath && !ms().romPath[i].empty()) {
+					const size_t len = ms().romPath[i].length();
+					if (strncasecmp(currentPath, ms().romPath[i].c_str(), len) == 0) {
+						if (len > 0 && ms().romPath[i][len-1] == '/') {
+							inRomPath = true;
+						} else if (currentPath[len] == '/' || currentPath[len] == '\0') {
+							inRomPath = true;
+						}
 					}
 				}
+				if (inRomPath) break;
 			}
-			if (inRomPath) break;
 		}
 	}
 
