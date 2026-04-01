@@ -184,6 +184,34 @@ void getDirectoryContents(std::vector<DirEntry> &dirContents, const std::vector<
 	file_count = 0;
 	fileStartPos = 0;
 
+	bool inRomPath = false;
+	char currentPath[PATH_MAX];
+	if (getcwd(currentPath, PATH_MAX)) {
+		for (int i = 0; i < 2; i++) {
+			if (!ms().romfolder[i].empty()) {
+				const size_t len = ms().romfolder[i].length();
+				if (strncasecmp(currentPath, ms().romfolder[i].c_str(), len) == 0) {
+					if (len > 0 && ms().romfolder[i][len-1] == '/') {
+						inRomPath = true;
+					} else if (currentPath[len] == '/' || currentPath[len] == '\0') {
+						inRomPath = true;
+					}
+				}
+			}
+			if (!inRomPath && !ms().romPath[i].empty()) {
+				const size_t len = ms().romPath[i].length();
+				if (strncasecmp(currentPath, ms().romPath[i].c_str(), len) == 0) {
+					if (len > 0 && ms().romPath[i][len-1] == '/') {
+						inRomPath = true;
+					} else if (currentPath[len] == '/' || currentPath[len] == '\0') {
+						inRomPath = true;
+					}
+				}
+			}
+			if (inRomPath) break;
+		}
+	}
+
 	DIR *pdir = opendir(".");
 
 	if (pdir == nullptr) {
@@ -235,7 +263,7 @@ void getDirectoryContents(std::vector<DirEntry> &dirContents, const std::vector<
 					fileStartPos++;
 				}
 				emplaceBackDirContent =
-				((pent->d_type == DT_DIR && strcmp(pent->d_name, ".") != 0 && strcmp(pent->d_name, "..") != 0 && pent->d_name[0] != '_'
+				((pent->d_type == DT_DIR && strcmp(pent->d_name, ".") != 0 && strcmp(pent->d_name, "..") != 0 && (pent->d_name[0] != '_' || inRomPath)
 					&& strcmp(pent->d_name, "saves") != 0 && strcmp(pent->d_name, "ramdisks") != 0 && strcmp(pent->d_name, "System Volume Information") != 0)
 					|| nameEndsWith(pent->d_name, extensionList));
 			} else {
